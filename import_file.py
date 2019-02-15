@@ -23,6 +23,13 @@ raw_dir = directory + '{0}\\{1}\\raw\\'
 # prep_dir = directory + '{0}\\prep\\{1}\\{0}_outcome-epo.fif'
 
 def create_folders(directory, subject, condition):
+    '''
+    :param directory: str, main directory of the lfp database
+    :param subject: list of str, name of the subjects
+    :param condition: list of str, task condition
+
+    :return: create the folders to store the data
+    '''
     folders = ['infos', 'beh_data', 'neu_data', 'prep', 'epochs', 'raw']
     for sub in subject:
         for cond in condition:
@@ -31,7 +38,19 @@ def create_folders(directory, subject, condition):
                     os.makedirs(directory + '{0}\\{1}\\{2}'.format(sub, cond, f))
 
 
-def save_info(directory, xls, condition, subject, info_dir, rawmat_dir):
+def save_info(directory, xls, subject, condition, info_dir, rawmat_dir):
+    '''
+    :param directory: str, main directory of the lfp database
+    :param xls: str, name of the xls file cointaining the information
+    :param subject: list of str, names of the subjects to iterate
+    :param condition: list of str, conditions of the task to iterate
+    :param info_dir: str, name of the directory in which the infos will be saved
+    :param rawmat_dir: str, name of the directory containing the raw mat files
+
+    :return: saves all the info in different json files (dict),
+             save a file containing the name of the present and missing mat file (list of lists)
+             save a file with the info labels (list)
+    '''
     for sub in subject:
         for cond in condition:
             ld_xls = pd.read_excel(directory + xls.format(cond), sheet_name=sub)
@@ -59,6 +78,7 @@ def save_info(directory, xls, condition, subject, info_dir, rawmat_dir):
             print len(abs_f), 'files not found for {0}, condition {1}:'.format(sub, cond), '\n', abs_f
             np.save(info_dir.format(sub, cond) + 'trials_info', [pres_f, abs_f])
             np.save(info_dir.format(sub, cond) + 'info_args', items)
+
 
 def create_rawfiles():
     data_dict = OrderedDict()
