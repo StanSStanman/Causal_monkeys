@@ -54,6 +54,7 @@ def save_info(directory, xls, subject, condition, info_dir, rawmat_dir):
     for sub in subject:
         for cond in condition:
             ld_xls = pd.read_excel(directory + xls.format(cond), sheet_name=sub)
+            ld_xls = ld_xls.rename(columns={'Best block-target': 'block_target'})
             items = list(ld_xls.columns.values.astype(str))
             date = items.pop(1)
             items_form = [str, int, int, str, int, str, int, int, str, str, str]
@@ -68,15 +69,16 @@ def save_info(directory, xls, subject, condition, info_dir, rawmat_dir):
                         f = '0' + f
                     ld_xls['file'][n] = f
             for s in ld_xls.iterrows():
-                s[1].to_json(path_or_buf=info_dir.format(sub, cond) + 'info_{0}.json'.format(s[1]['file']), orient='index')
+                s[1].to_json(path_or_buf=info_dir.format(sub, cond) + 'info_{0}.json'.format(s[1]['file']),
+                             orient='index', force_ascii=False)
             files = ld_xls['file'].tolist()
             pres_f, abs_f = [], []
             for fn in files:
                 if os.path.isfile(rawmat_dir.format(sub, cond) + 'fneu{0}.mat'.format(fn)):
-                    pres_f.append(fn)
-                else: abs_f.append(fn)
+                    pres_f.append('fneu'+fn)
+                else: abs_f.append('fneu'+fn)
             print len(abs_f), 'files not found for {0}, condition {1}:'.format(sub, cond), '\n', abs_f
-            np.save(info_dir.format(sub, cond) + 'trials_info', [pres_f, abs_f])
+            np.save(info_dir.format(sub, cond) + 'files_info', [pres_f, abs_f])
             np.save(info_dir.format(sub, cond) + 'info_args', items)
 
 
