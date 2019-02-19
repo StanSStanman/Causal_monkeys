@@ -80,26 +80,61 @@ def save_info(directory, xls, subject, condition, info_dir, rawmat_dir):
             np.save(info_dir.format(sub, cond) + 'info_args', items)
 
 
-def create_rawfiles():
+def create_rawfiles(subject, condition, session, rawmat_dir):
     data_dict = OrderedDict()
     data_labels = ['lfp', 'mua', 'time', 'trigger_time', 'action_time', 'contact_time', 'action', 'outcome']
 
-    matfile = loadmat(rawmat_dir.format(subject[0], condition[0]) + '{0}'.format(session[0]))
-    mat_data = matfile['data']
+    for sub in subject:
+        for cond in condition:
+            for ses in session:
+                matfile = loadmat(rawmat_dir.format(sub, cond) + '{0}'.format(ses))
+                mat_data = matfile['data']
 
-    for d, l in zip(mat_data, data_labels):
-        data_dict[l] = d
+                for d, l in zip(mat_data[0][0], data_labels):
+                    data_dict[l] = d
 
-    values = np.vstack((data_dict['lfp'], data_dict['mua'], data_dict['time']))
-    ch_types = ['seeg', 'seeg']
-    ch_names = ['lfp', 'mua']
-    sfreq = 16670
-    info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
-    raw = mne.io.RawArray(values[:2,:], info)
-    scalings = {'seeg':2}
-    raw.plot(n_channels = 2, scalings=scalings, show=True, block=True)
+                time = data_dict['time'].astype(float)
+                neu_data = np.vstack((data_dict['lfp'].astype(float), data_dict['mua'].astype(float)))#, data_dict['time']))
+
+                ch_types = ['seeg', 'seeg']
+                ch_names = ['lfp', 'mua']
+                sfreq = 16667
+                info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
+                raw = mne.io.RawArray(neu_data, info)
+
+                raw_lfp = raw.copy().pick_channels(['lfp'])
+                raw_mua = raw.copy().pick_channels(['mua'])
+
+                act_times = data_dict['action_time'].copy() * 1000
+                act_times = np.around(act_times, decimals=0).astype(int)
+                outc_times = data_dict['contact_time'].copy() * 1000
+                outc_times = np.around(outc_times, decimals=0).astype(int)
+
+                action_events = np.hstack((act_times, np.zeros((len(act_times), 1), dtype=int), data_dict['action'].astype(int)))
+                outcome_events = np.hstack((outc_times, np.zeros((len(outc_times), 1), dtype=int), data_dict['outcome'].astype(int)))
+
+                epo_lfp_act = mne.Epochs(raw_lfp, action_events)
+                epo_lfp_outc = mne.Epochs(raw_lfp, outcome_events)
+                epo_mua_act = mne.Epochs(raw_mua, action_events)
+                epo_mua_outc = mne.Epochs(raw_mua, outcome_events)
+
+                freqs = np.arange(5.0, 60.0, 3.0)
+                n_cycles = freqs / 5
+                tfr = mne.time_frequency.tfr_morlet(epo_lfp_act, freqs, n_cycles, return_itc=False, average=True)
+                tfr.plot([0], baseline=(0.3, 0.5), mode='zlogratio', tmin=-0.15, tmax=0.45, vmin=-3, vmax=3)
+
+                scalings = {'seeg':2}
+                raw.plot(n_channels = 2, scalings=scalings, show=True, block=True)
+
+                # from mne.time_frequency.tfr import cwt
+                # mua = neu_data[1, :]
+                # mua = mua.astype(float)
+                # mua = np.expand_dims(mua, 0)
+                # time = mat_data[0][0][2].astype(float)
+                # wave = cwt(mua, time, use_fft=False, decim=1667)
 
     print('ciao')
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
 #     save_info(directory, xls_fname, condition, subject, info_dir, rawmat_dir)
+    create_rawfiles(subject, condition, session, rawmat_dir)
