@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 
 def create_folders(directory, subject, condition):
-    '''
+    ''' Function to create all the folders needed for the analysis
+
     :param directory: str, main directory of the lfp database
     :param subject: list of str, name of the subjects
     :param condition: list of str, task condition
@@ -19,14 +20,14 @@ def create_folders(directory, subject, condition):
 
 
 def save_info(directory, xls, subject, condition, info_dir, rawmat_dir):
-    '''
+    ''' Function to read and save in different files all the information about each condition
+
     :param directory: str, main directory of the lfp database
     :param xls: str, name of the xls file cointaining the information
     :param subject: list of str, names of the subjects to iterate
     :param condition: list of str, conditions of the task to iterate
     :param info_dir: str, name of the directory in which the infos will be saved
     :param rawmat_dir: str, name of the directory containing the raw mat files
-
     :return: saves all the info in different json files (dict),
              save a file containing the name of the present and missing mat file (list of lists)
              save a file with the info labels (list)

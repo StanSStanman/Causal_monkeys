@@ -1,6 +1,11 @@
 import warnings
 
 def session_name(session):
+    ''' Correct the session name in input
+
+    :param session: str, name of the session
+    :return: str, the number of the session
+    '''
     if 'fneu' in session:
         trial_num = session.replace('fneu', '')
     elif 'fneu' not in session:

@@ -5,22 +5,40 @@ from directories import raw_dir
 from controls import session_name
 
 def create_rawfiles(subject, condition, session):
+    ''' Create and save the raw files
+
+    :param subject: str, name of the subject
+    :param condition: str, name of the condition
+    :param session: str, name of the session
+    :return: save a raw file as 'session_raw.fif' in the 'raw_dir' folder
+    '''
+    # Correct the session name
     trial_num = session_name(session)
 
+    # Read the associated informatio in the mat file
     data_dict = read_matfile(subject, condition, session)
 
+    # Create the channels matrix for the row object, and add a zero before because the starting time point in a raw object is zero
     time = data_dict['time'][0].astype(float)
     neu_data = np.vstack((data_dict['lfp'].astype(float), data_dict['mua'].astype(float)))#, data_dict['time']))
     zero = np.zeros((2, 1))
     neu_data = np.hstack((zero, neu_data))
 
+    # Setting the insofrations for the raw object
     ch_types = ['seeg', 'seeg']
     ch_names = ['lfp', 'mua']
-    sfreq = len(time) / (time[-1] - time[0]) #16667
+    sfreq = len(time) / (time[-1] - time[0]) # I prefer to calculate the sfreq from data to have more accuracy, otherwise set to 16667.0
     info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
+    # Creating the raw object
     raw = mne.io.RawArray(neu_data, info)
 
+    # Save the raw object
     raw.save(raw_dir.format(subject, condition) + '{0}_raw.fif'.format(trial_num), overwrite=True)
+
+
+
+
+
 
     # tr_info = trial_info(subject, condition, session.replace('fneu', ''))
 

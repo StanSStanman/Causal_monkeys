@@ -1,3 +1,5 @@
+# In this script is possible to modify the folder in which the data are stored.
+
 directory = 'D:\\Databases\\db_lfp\\meg_causal\\'
 xls_fname = 'dataset_StriPAN_proba-{0}.xlsx'
 rawmat_dir = directory + '{0}\\{1}\\raw_matlab\\' #{2}.mat' #.format(subject, condition, session)

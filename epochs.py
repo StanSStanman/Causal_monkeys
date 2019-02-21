@@ -6,7 +6,13 @@ from read_infos import read_matfile
 from controls import session_name, check_rejected_epochs
 
 def create_epochs(subject, condition, session):
+    ''' Create and save the epochs files aligned on trigger, action and outcome
 
+    :param subject: str, name of the subject
+    :param condition: str, name of the condition
+    :param session: str, name of the session
+    :return: save epochs files in different folders named by session
+    '''
     t_times = [-2.5, 1.5]
     a_times = [-1.5, 1.5]
     o_times = [-1.5, 1.5]
