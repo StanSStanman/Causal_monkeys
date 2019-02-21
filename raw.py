@@ -1,53 +1,47 @@
-from collections import OrderedDict
-from scipy.io import loadmat
 import numpy as np
 import mne
-from read_infos import trial_info
+from read_infos import trial_info, read_matfile
 from directories import raw_dir
+from controls import session_name
 
-def create_rawfiles(subject, condition, session, rawmat_dir):
-    data_dict = OrderedDict()
-    data_labels = ['lfp', 'mua', 'time', 'trigger_time', 'action_time', 'contact_time', 'action', 'outcome']
+def create_rawfiles(subject, condition, session):
+    trial_num = session_name(session)
 
-    matfile = loadmat(rawmat_dir.format(subject, condition) + '{0}'.format(session))
-    mat_data = matfile['data']
+    data_dict = read_matfile(subject, condition, session)
 
-    for d, l in zip(mat_data[0][0], data_labels):
-        data_dict[l] = d
-
-    time = data_dict['time'].astype(float)
+    time = data_dict['time'][0].astype(float)
     neu_data = np.vstack((data_dict['lfp'].astype(float), data_dict['mua'].astype(float)))#, data_dict['time']))
+    zero = np.zeros((2, 1))
+    neu_data = np.hstack((zero, neu_data))
 
     ch_types = ['seeg', 'seeg']
     ch_names = ['lfp', 'mua']
-    sfreq = 16667
+    sfreq = len(time) / (time[-1] - time[0]) #16667
     info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
     raw = mne.io.RawArray(neu_data, info)
 
-    tr_info = trial_info(subject, condition, session.replace('fneu', ''))
+    raw.save(raw_dir.format(subject, condition) + '{0}_raw.fif'.format(trial_num), overwrite=True)
+
+    # tr_info = trial_info(subject, condition, session.replace('fneu', ''))
 
     # raw_lfp = raw.copy().pick_channels(['lfp'])
     # raw_mua = raw.copy().pick_channels(['mua'])
 
-    trig_times = data_dict['trigger_time'].copy() * 1000
-    trig_times = np.around(trig_times, decimals=0).astype(int)
-    act_times = data_dict['action_time'].copy() * 1000
-    act_times = np.around(act_times, decimals=0).astype(int)
-    outc_times = data_dict['contact_time'].copy() * 1000
-    outc_times = np.around(outc_times, decimals=0).astype(int)
+    # trig_times = data_dict['trigger_time'].copy() * 1000
+    # trig_times = np.around(trig_times, decimals=0).astype(int)
+    # act_times = data_dict['action_time'].copy() * 1000
+    # act_times = np.around(act_times, decimals=0).astype(int)
+    # outc_times = data_dict['contact_time'].copy() * 1000
+    # outc_times = np.around(outc_times, decimals=0).astype(int)
 
-    trigger_events = np.hstack((trig_times, np.zeros((len(trig_times), 1), dtype=int), np.ones((len(trig_times), 1), dtype=int)))
-    action_events = np.hstack((act_times, np.zeros((len(act_times), 1), dtype=int), data_dict['action'].astype(int)))
-    outcome_events = np.hstack((outc_times, np.zeros((len(outc_times), 1), dtype=int), data_dict['outcome'].astype(int)))
+    # trigger_events = np.hstack((trig_times, np.zeros((len(trig_times), 1), dtype=int), np.ones((len(trig_times), 1), dtype=int)))
+    # action_events = np.hstack((act_times, np.zeros((len(act_times), 1), dtype=int), data_dict['action'].astype(int)))
+    # outcome_events = np.hstack((outc_times, np.zeros((len(outc_times), 1), dtype=int), data_dict['outcome'].astype(int)))
 
-    raw.info['file_id'] = {key: tr_info[key] for key in ['file', 'test']}
-    raw.info['subject_info'] = {key: tr_info[key] for key in ['monk', 'Nneu', 'descente', 'territory', 'block_target']}
+    # raw.info['file_id'] = {key: tr_info[key] for key in ['file', 'test']}
+    # raw.info['subject_info'] = {key: tr_info[key] for key in ['monk', 'Nneu', 'descente', 'territory', 'block_target']}
     # raw.info['description'] = {key: tr_info[key] for key in ['monk', 'Nneu', 'descente', 'territory', 'block_target']}
-    raw.info['subject_info'].update({'trig_events': trigger_events, 'act_events': action_events, 'outc_events': outcome_events})
-
-    raw.save(raw_dir.format(subject, condition) + '{0}_raw.fif'.format(session.replace('fneu', '')), overwrite=True)
-
-
+    # raw.info['subject_info'].update({'trig_events': trigger_events, 'act_events': action_events, 'outc_events': outcome_events})
 
     # epo_lfp_act = mne.Epochs(raw_lfp, action_events)
     # epo_lfp_outc = mne.Epochs(raw_lfp, outcome_events)
