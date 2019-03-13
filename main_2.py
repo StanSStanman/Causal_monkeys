@@ -1,7 +1,7 @@
 from base_structure import create_folders, save_info
 from read_infos import info_labels, files_info, trial_info
 from raw import create_rawfiles, plot_rawdata
-from epochs import create_epochs
+from epochs import create_epochs, plot_epochs
 from frequences_analysis import plot_psd, plot_tfr
 
 from directories import (directory,
@@ -30,7 +30,8 @@ if __name__ == '__main__':
                 session = files_info(subj, cond)[0]
             for sess in session:
                 # create_rawfiles(subj, cond, sess)
-                create_epochs(subj, cond, sess)
+                # create_epochs(subj, cond, sess)
                 # plot_rawdata(subj, cond, sess)
                 # plot_psd(subj, cond, sess)
                 # plot_tfr(subj, cond, sess, 'trigger')
+                plot_epochs(subj, cond, sess, 'trigger', picks=['lfp'], all=True)
