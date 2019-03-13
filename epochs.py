@@ -60,7 +60,7 @@ def create_epochs(subject, condition, session):
         check_rejected_epochs(e, ee, raw.times, tw)
 
     # Creating folders for epochs
-    epo_dir = epochs_dir.format(subject, condition) + '{0}\\'.format(trial_num)
+    epo_dir = epochs_dir.format(subject, condition, trial_num)# + '{0}\\'.format(trial_num)
     if not os.path.exists(epo_dir):
         os.makedirs(epo_dir)
 
@@ -72,3 +72,19 @@ def create_epochs(subject, condition, session):
     # Uncomment the following lines if you want to calculate the baseline too
     # baseline_epochs = mne.Epochs(raw, trigger_events, tmin=-2.0, tmax=-1.5, baseline=(None, None))
     # baseline_epochs.save(epo_dir + '{0}_baseline-epo.fif'.format(trial_num))
+
+def plot_epochs(subject, condition, session, item, scale=2., n_epochs=5, picks=None, all=False):
+
+    # Correct session name and read the associate epochs file
+    trial_num = session_name(session)
+    epochs_fname = epochs_dir.format(subject, condition, trial_num) + '{0}_{1}-epo.fif'.format(trial_num, item)
+    epochs = mne.read_epochs(epochs_fname, preload=True)
+
+    if isinstance(picks, list):
+        epochs.pick_channels(picks)
+
+    scalings = {'seeg': scale}
+    if all == True:
+        epochs.plot_image()
+    elif all == False:
+        epochs.plot(n_channels=2, scalings=scalings, n_epochs=n_epochs, show=True, block=True)

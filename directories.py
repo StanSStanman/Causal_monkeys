@@ -9,5 +9,5 @@ info_dir = directory + '{0}'+s+'{1}'+s+'infos'+s #info_{2}.json' #.format(subjec
 neu_dir = directory + '{0}'+s+'{1}'+s+'neu_data'+s #{2}.npz' #.format(subject, condition, session)
 beh_dir = directory + '{0}'+s+'{1}'+s+'beh_data'+s #{2}.npz' #.format(subject, condition, session)
 raw_dir = directory + '{0}'+s+'{1}'+s+'raw'+s
-epochs_dir = directory + '{0}'+s+'{1}'+s+'epochs'+s
+epochs_dir = directory + '{0}'+s+'{1}'+s+'epochs'+s+'{2}'+s
 # prep_dir = directory + '{0}\\prep\\{1}\\{0}_outcome-epo.fif'
