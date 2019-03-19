@@ -1,4 +1,5 @@
 import warnings
+from read_infos import trial_info
 
 def session_name(session):
     ''' Correct the session name in input
@@ -31,3 +32,10 @@ def check_rejected_epochs(events_idx, dropped_idx, times, t_window):
             elif (d_time + t_window[1] > max_t):
                 warnings.warn('Epochs rejected for time issue (t_max > 0)')
             else: assert False, 'Ther is a problem in time series, please check.'
+
+def check_area(subject, condition, session, areas):
+    trial_num = session_name(session)
+    infos = trial_info(subject, condition, trial_num)
+    if infos['territory'] == areas:
+        return trial_num
+    else: pass
