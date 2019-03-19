@@ -27,7 +27,8 @@ def create_rawfiles(subject, condition, session):
     # Setting the insofrations for the raw object
     ch_types = ['seeg', 'seeg']
     ch_names = ['lfp', 'mua']
-    sfreq = len(time) / (time[-1] - time[0]) # I prefer to calculate the sfreq from data to have more accuracy, otherwise set to 16667.0
+    # sfreq = len(time) / (time[-1] - time[0]) # I prefer to calculate the sfreq from data to have more accuracy, otherwise set to 16667.0
+    sfreq = 16667.0
     info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
     # Creating the raw object
     raw = mne.io.RawArray(neu_data, info)
